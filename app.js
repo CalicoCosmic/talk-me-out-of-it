@@ -526,61 +526,63 @@ Do NOT include any introduction, conversational filler, or markdown wrappers. Ou
     }
 
     // 2. Otherwise, use user's personal key directly via Google Generative Language API
-    let resolvedModelEndpoints = [];
+    const candidateModels = [
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-2.5-pro',
+      'gemini-2.0-flash-lite',
+      'gemini-2.0-flash-001'
+    ];
 
-    // Attempt to automatically discover which models are enabled for this key
+    let resolvedModelEndpoints = candidateModels.map(m => ({
+      name: m,
+      url: `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(this.apiKey)}`
+    }));
+
+    // Also attempt dynamic discovery to see if there's any other model enabled
     try {
-      const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(this.apiKey)}`);
+      const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(this.apiKey)}`, {
+        headers: { 'x-goog-api-key': this.apiKey }
+      });
       if (listResp.ok) {
         const listData = await listResp.json();
         const available = (listData.models || []).filter(m => 
           m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent')
         );
 
-        // Prioritize fast, high-quality models (gemini-2.0-flash, gemini-1.5-flash-latest, etc.)
-        available.sort((a, b) => {
-          const aName = a.name.toLowerCase();
-          const bName = b.name.toLowerCase();
-          const score = (name) => {
-            if (name.includes('2.0-flash')) return 4;
-            if (name.includes('flash-latest')) return 3;
-            if (name.includes('flash')) return 2;
-            return 1;
-          };
-          return score(bName) - score(aName);
-        });
+        if (available.length > 0) {
+          available.sort((a, b) => {
+            const score = (n) => {
+              if (n.includes('2.5-flash')) return 5;
+              if (n.includes('2.0-flash')) return 4;
+              if (n.includes('flash')) return 3;
+              return 1;
+            };
+            return score(b.name.toLowerCase()) - score(a.name.toLowerCase());
+          });
 
-        resolvedModelEndpoints = available.map(m => 
-          `https://generativelanguage.googleapis.com/v1beta/${m.name}:generateContent?key=${encodeURIComponent(this.apiKey)}`
-        );
+          resolvedModelEndpoints = available.map(m => {
+            const shortName = m.name.replace(/^models\//, '');
+            return {
+              name: shortName,
+              url: `https://generativelanguage.googleapis.com/v1beta/${m.name}:generateContent?key=${encodeURIComponent(this.apiKey)}`
+            };
+          });
+        }
       }
     } catch (e) {
       console.warn('Could not auto-fetch model list:', e);
     }
 
-    // Fallback endpoints if listModels was unavailable
-    if (resolvedModelEndpoints.length === 0) {
-      const candidateModels = [
-        'gemini-2.0-flash',
-        'gemini-1.5-flash-latest',
-        'gemini-2.0-flash-exp',
-        'gemini-1.5-flash',
-        'gemini-1.5-pro-latest'
-      ];
-      resolvedModelEndpoints = [
-        ...candidateModels.map(m => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(this.apiKey)}`),
-        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(this.apiKey)}`
-      ];
-    }
+    const failureReasons = [];
 
-    let lastError = null;
-
-    for (const url of resolvedModelEndpoints) {
+    for (const { name, url } of resolvedModelEndpoints) {
       try {
         const response = await fetch(url, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'x-goog-api-key': this.apiKey
           },
           body: JSON.stringify({
             contents: [
@@ -590,24 +592,29 @@ Do NOT include any introduction, conversational filler, or markdown wrappers. Ou
               }
             ],
             generationConfig: {
-              temperature: 0.6,
-              topK: 40,
-              topP: 0.95
+              temperature: 0.7
             }
           })
         });
 
         if (!response.ok) {
           const errData = await response.json().catch(() => ({}));
-          const errMsg = errData.error?.message || `HTTP ${response.status} from Gemini API`;
+          const errMsg = errData.error?.message || `HTTP ${response.status}`;
           throw new Error(errMsg);
         }
 
         const data = await response.json();
-        const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        const candidate = data.candidates?.[0];
+        const parts = candidate?.content?.parts || [];
+
+        // Support both regular parts and thinking parts (Gemini 2.5)
+        const validParts = parts.filter(p => p.text && !p.thought);
+        let textResponse = validParts.length > 0 
+          ? validParts.map(p => p.text).join('') 
+          : (parts[parts.length - 1]?.text || '');
 
         if (!textResponse) {
-          throw new Error('No content returned from Gemini API.');
+          throw new Error('No text content returned from candidate.');
         }
 
         // Clean JSON output (strip backticks or markdown fences if present)
@@ -618,18 +625,18 @@ Do NOT include any introduction, conversational filler, or markdown wrappers. Ou
 
         const parsed = JSON.parse(cleaned);
         if (!parsed.slides || !Array.isArray(parsed.slides)) {
-          throw new Error('Invalid presentation structure returned.');
+          throw new Error('Invalid presentation structure in JSON.');
         }
 
         return parsed;
       } catch (err) {
-        lastError = err;
-        console.warn(`Model endpoint attempt failed: ${url}`, err);
+        failureReasons.push(`[${name}]: ${err.message}`);
+        console.warn(`Model ${name} attempt failed:`, err);
         // Continue to next endpoint candidate
       }
     }
 
-    throw lastError || new Error('Failed to generate presentation deck.');
+    throw new Error(failureReasons.slice(0, 2).join(' | ') || 'All Gemini endpoints failed.');
   },
 
   loadPresentation(presentation) {
