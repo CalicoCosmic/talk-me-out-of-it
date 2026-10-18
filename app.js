@@ -602,11 +602,11 @@ Do NOT include any introduction, conversational filler, or markdown wrappers. Ou
     riskBadge.textContent = `${riskScore}% Regret Risk • ${presentation.verdict || 'High Risk'}`;
     
     if (riskScore >= 80) {
-      riskBadge.className = 'px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-sans text-[10px] uppercase font-bold tracking-wider';
+      riskBadge.className = 'px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-sans text-[10px] uppercase font-bold tracking-wider';
     } else if (riskScore >= 50) {
-      riskBadge.className = 'px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-sans text-[10px] uppercase font-bold tracking-wider';
+      riskBadge.className = 'px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-sans text-[10px] uppercase font-bold tracking-wider';
     } else {
-      riskBadge.className = 'px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-sans text-[10px] uppercase font-bold tracking-wider';
+      riskBadge.className = 'px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-sans text-[10px] uppercase font-bold tracking-wider';
     }
 
     // Update Bottom Line Verdict
@@ -696,29 +696,29 @@ Do NOT include any introduction, conversational filler, or markdown wrappers. Ou
       <div class="slide-accent-border">
         <!-- Slide Header Badge -->
         <div class="flex items-center justify-between gap-4 mb-4">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-mono font-semibold uppercase tracking-wider">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-100 border border-rose-200 text-rose-700 text-xs font-mono font-semibold uppercase tracking-wider">
             <i data-lucide="${iconName}" class="w-3.5 h-3.5"></i>
             <span>${slide.category}</span>
           </div>
-          <span class="text-xs font-mono text-slate-500">
+          <span class="text-xs font-mono text-slate-500 font-semibold">
             PART ${slide.slideNumber} / ${totalSlides}
           </span>
         </div>
 
         <!-- Headline & Key Point -->
-        <h3 class="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight mb-3 leading-tight">
+        <h3 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-3 leading-tight">
           ${slide.headline}
         </h3>
         
-        <p class="text-base sm:text-lg text-rose-300 font-medium mb-6">
+        <p class="text-base sm:text-lg text-rose-700 font-semibold mb-6">
           ${slide.keyPoint}
         </p>
 
         <!-- Bullet Arguments -->
         <div class="space-y-3 mb-6">
           ${slide.arguments.map(arg => `
-            <div class="flex items-start gap-3 bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 text-sm sm:text-base text-slate-200">
-              <span class="text-rose-500 font-bold shrink-0 mt-0.5">•</span>
+            <div class="flex items-start gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-sm sm:text-base text-slate-800 shadow-sm">
+              <span class="text-rose-600 font-bold shrink-0 mt-0.5">•</span>
               <span class="leading-relaxed">${arg}</span>
             </div>
           `).join('')}
@@ -726,11 +726,11 @@ Do NOT include any introduction, conversational filler, or markdown wrappers. Ou
       </div>
 
       <!-- Burn Quote / Reality Check Callout -->
-      <div class="mt-4 pt-4 border-t border-slate-800/80 flex items-start gap-3 bg-slate-900/60 p-4 rounded-2xl border-l-4 border-rose-500">
+      <div class="mt-4 pt-4 border-t border-slate-200 flex items-start gap-3 bg-rose-50/80 p-4 rounded-2xl border-l-4 border-rose-500">
         <span class="text-2xl">🧊</span>
         <div>
-          <span class="text-[10px] font-mono uppercase tracking-wider text-rose-400 font-bold block mb-0.5">Cold Reality Check</span>
-          <p class="text-xs sm:text-sm italic text-slate-300 font-serif">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-rose-700 font-bold block mb-0.5">Cold Reality Check</span>
+          <p class="text-xs sm:text-sm italic text-slate-800 font-serif">
             "${slide.burnQuote}"
           </p>
         </div>
@@ -760,24 +760,24 @@ Do NOT include any introduction, conversational filler, or markdown wrappers. Ou
     if (!this.currentPresentation?.slides) return;
 
     grid.innerHTML = this.currentPresentation.slides.map((slide, idx) => `
-      <div class="grid-slide-card bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col justify-between hover:border-slate-700 transition">
+      <div class="grid-slide-card bg-white border border-slate-200 rounded-2xl p-5 shadow-md flex flex-col justify-between hover:border-slate-300 transition">
         <div>
-          <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
-            <span class="px-2 py-0.5 rounded bg-slate-800 text-rose-300 font-semibold">${slide.category}</span>
-            <span>#${idx + 1}</span>
+          <div class="flex items-center justify-between text-xs font-mono text-slate-500 mb-2">
+            <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-semibold">${slide.category}</span>
+            <span class="font-bold">#${idx + 1}</span>
           </div>
-          <h4 class="text-lg font-bold text-white mb-2 leading-snug">${slide.headline}</h4>
-          <p class="text-xs text-rose-300 mb-4">${slide.keyPoint}</p>
+          <h4 class="text-lg font-bold text-slate-900 mb-2 leading-snug">${slide.headline}</h4>
+          <p class="text-xs text-rose-700 font-semibold mb-4">${slide.keyPoint}</p>
           <ul class="space-y-2 mb-4">
             ${slide.arguments.map(arg => `
-              <li class="text-xs text-slate-300 flex items-start gap-2">
-                <span class="text-rose-500 font-bold shrink-0">•</span>
+              <li class="text-xs text-slate-700 flex items-start gap-2">
+                <span class="text-rose-600 font-bold shrink-0">•</span>
                 <span>${arg}</span>
               </li>
             `).join('')}
           </ul>
         </div>
-        <div class="pt-3 border-t border-slate-800 text-xs italic text-slate-400 bg-slate-950/40 p-2.5 rounded-lg border-l-2 border-rose-500">
+        <div class="pt-3 border-t border-slate-100 text-xs italic text-slate-700 bg-rose-50/70 p-2.5 rounded-lg border-l-2 border-rose-500">
           "${slide.burnQuote}"
         </div>
       </div>

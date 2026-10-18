@@ -1,5 +1,5 @@
 /* =========================================================================
-   Talk Me Out Of It — Custom Styles & Presentation Animations
+   Talk Me Out Of It — Light Theme Styles & Presentation Animations
    ========================================================================= */
 
 /* Smooth scroll & typography polish */
@@ -38,20 +38,20 @@ html {
   }
 }
 
-/* Custom Scrollbars */
+/* Custom Scrollbars for light theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #f8fafc;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #94a3b8;
 }
 
 /* Slide Card Aesthetic */
@@ -65,7 +65,7 @@ html {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #f43f5e, #f59e0b, #ec4899);
+  background: linear-gradient(90deg, #e11d48, #f59e0b, #ec4899);
   border-top-left-radius: 1.5rem;
   border-top-right-radius: 1.5rem;
 }
@@ -75,24 +75,24 @@ html {
   width: 10px;
   height: 10px;
   border-radius: 9999px;
-  background-color: #334155;
+  background-color: #cbd5e1;
   transition: all 0.25s ease;
   cursor: pointer;
 }
 .slide-dot:hover {
-  background-color: #64748b;
+  background-color: #94a3b8;
   transform: scale(1.2);
 }
 .slide-dot.active {
   width: 28px;
-  background: linear-gradient(90deg, #f43f5e, #fb7185);
-  box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+  background: linear-gradient(90deg, #e11d48, #fb7185);
+  box-shadow: 0 0 10px rgba(225, 29, 72, 0.35);
 }
 
 /* Fullscreen Presentation Mode adjustments */
 :fullscreen #presentationSection {
   padding: 2rem 4rem;
-  background: #020617;
+  background: #f8fafc;
   height: 100vh;
   justify-content: center;
 }
@@ -100,6 +100,7 @@ html {
 :fullscreen #activeSlideCard {
   max-width: 1100px;
   min-height: 600px;
+  background: #ffffff;
 }
 
 /* Print / PDF Styles */
@@ -128,18 +129,10 @@ html {
   }
 
   .grid-slide-card {
-    border: 1px solid #ccc !important;
-    background: #fdfdfd !important;
-    color: #111 !important;
+    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
     box-shadow: none !important;
     page-break-inside: avoid;
-  }
-
-  .text-white {
-    color: #000 !important;
-  }
-
-  .text-slate-400, .text-slate-300 {
-    color: #444 !important;
   }
 }
