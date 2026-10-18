@@ -58,13 +58,43 @@ export default {
         });
       }
 
-      // Try Gemini 2.5 Flash first, then Gemini 1.5 Flash as fallback
-      const models = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+      // Dynamic model discovery for worker
+      let resolvedEndpoints = [];
+      try {
+        const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+        if (listResp.ok) {
+          const listData = await listResp.json();
+          const available = (listData.models || []).filter(m => 
+            m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent')
+          );
+          available.sort((a, b) => {
+            const score = (n) => (n.includes('2.0-flash') ? 4 : (n.includes('flash-latest') ? 3 : (n.includes('flash') ? 2 : 1)));
+            return score(b.name.toLowerCase()) - score(a.name.toLowerCase());
+          });
+          resolvedEndpoints = available.map(m => `https://generativelanguage.googleapis.com/v1beta/${m.name}:generateContent?key=${apiKey}`);
+        }
+      } catch (e) {
+        console.warn('Could not auto-fetch model list in worker:', e);
+      }
+
+      if (resolvedEndpoints.length === 0) {
+        const candidateModels = [
+          'gemini-2.0-flash',
+          'gemini-1.5-flash-latest',
+          'gemini-2.0-flash-exp',
+          'gemini-1.5-flash',
+          'gemini-1.5-pro-latest'
+        ];
+        resolvedEndpoints = [
+          ...candidateModels.map(m => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`),
+          `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`
+        ];
+      }
+
       let lastError = null;
 
-      for (const model of models) {
+      for (const geminiUrl of resolvedEndpoints) {
         try {
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
           const geminiResponse = await fetch(geminiUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -107,7 +137,7 @@ export default {
           });
         } catch (err) {
           lastError = err;
-          console.warn(`Model ${model} failed:`, err);
+          console.warn(`Endpoint attempt failed: ${geminiUrl}`, err);
         }
       }
 

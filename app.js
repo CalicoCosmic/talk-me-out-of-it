@@ -526,13 +526,57 @@ Do NOT include any introduction, conversational filler, or markdown wrappers. Ou
     }
 
     // 2. Otherwise, use user's personal key directly via Google Generative Language API
-    const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+    let resolvedModelEndpoints = [];
+
+    // Attempt to automatically discover which models are enabled for this key
+    try {
+      const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(this.apiKey)}`);
+      if (listResp.ok) {
+        const listData = await listResp.json();
+        const available = (listData.models || []).filter(m => 
+          m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent')
+        );
+
+        // Prioritize fast, high-quality models (gemini-2.0-flash, gemini-1.5-flash-latest, etc.)
+        available.sort((a, b) => {
+          const aName = a.name.toLowerCase();
+          const bName = b.name.toLowerCase();
+          const score = (name) => {
+            if (name.includes('2.0-flash')) return 4;
+            if (name.includes('flash-latest')) return 3;
+            if (name.includes('flash')) return 2;
+            return 1;
+          };
+          return score(bName) - score(aName);
+        });
+
+        resolvedModelEndpoints = available.map(m => 
+          `https://generativelanguage.googleapis.com/v1beta/${m.name}:generateContent?key=${encodeURIComponent(this.apiKey)}`
+        );
+      }
+    } catch (e) {
+      console.warn('Could not auto-fetch model list:', e);
+    }
+
+    // Fallback endpoints if listModels was unavailable
+    if (resolvedModelEndpoints.length === 0) {
+      const candidateModels = [
+        'gemini-2.0-flash',
+        'gemini-1.5-flash-latest',
+        'gemini-2.0-flash-exp',
+        'gemini-1.5-flash',
+        'gemini-1.5-pro-latest'
+      ];
+      resolvedModelEndpoints = [
+        ...candidateModels.map(m => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(this.apiKey)}`),
+        `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(this.apiKey)}`
+      ];
+    }
+
     let lastError = null;
 
-    for (const model of modelsToTry) {
+    for (const url of resolvedModelEndpoints) {
       try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(this.apiKey)}`;
-        
         const response = await fetch(url, {
           method: 'POST',
           headers: {
@@ -580,8 +624,8 @@ Do NOT include any introduction, conversational filler, or markdown wrappers. Ou
         return parsed;
       } catch (err) {
         lastError = err;
-        console.warn(`Model ${model} attempt failed:`, err);
-        // Continue to next model if available
+        console.warn(`Model endpoint attempt failed: ${url}`, err);
+        // Continue to next endpoint candidate
       }
     }
 
