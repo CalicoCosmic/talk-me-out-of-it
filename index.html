@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Talk Me Out Of It — The Practical Buyer's Remorse Antidote</title>
+  <meta name="description" content="Paste a product URL or item you are thinking of buying. Google Gemini formulates an uncompromising, logical presentation to talk you out of it.">
+  
+  <!-- Favicon SVG -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛑</text></svg>">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fef2f2',
+              100: '#fee2e2',
+              200: '#fecaca',
+              300: '#fca5a5',
+              400: '#f87171',
+              500: '#ef4444',
+              600: '#dc2626',
+              700: '#b91c1c',
+              800: '#991b1b',
+              900: '#7f1d1d',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Menlo', 'Monaco', 'Courier New', 'monospace']
+          },
+          keyframes: {
+            slideIn: {
+              '0%': { opacity: '0', transform: 'translateY(16px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            pulseSubtle: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.6' }
+            }
+          },
+          animation: {
+            'slide-in': 'slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+            'pulse-subtle': 'pulseSubtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-rose-500 selection:text-white antialiased">
+
+  <!-- Top Navigation Header -->
+  <header class="border-b border-slate-800/80 bg-slate-950/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="app.resetToHome()">
+        <span class="text-2xl p-1.5 bg-rose-500/10 border border-rose-500/30 rounded-xl">🛑</span>
+        <div>
+          <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-rose-400 via-orange-300 to-amber-200 bg-clip-text text-transparent">
+            Talk Me Out Of It
+          </span>
+          <span class="hidden sm:inline-block text-xs font-mono text-slate-400 ml-2 px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800">
+            Powered by Gemini
+          </span>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <button id="demoBtn" type="button" class="text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-900 text-slate-300 hover:text-white hover:border-slate-500 transition">
+          ✨ Try Demo
+        </button>
+        <button id="apiKeyBtn" type="button" class="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-rose-500/40 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 transition">
+          <i data-lucide="key" class="w-3.5 h-3.5"></i>
+          <span id="apiKeyBtnLabel">API Key</span>
+        </button>
+        <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="p-2 text-slate-400 hover:text-white transition" title="View Source on GitHub">
+          <i data-lucide="github" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="flex-grow flex flex-col justify-center max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
+    
+    <!-- VIEW 1: Input / Search Screen -->
+    <section id="inputSection" class="w-full max-w-2xl mx-auto flex flex-col items-center text-center my-auto py-6">
+      
+      <!-- Headline & Tagline -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-semibold mb-6 uppercase tracking-wider">
+        <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i>
+        Impulse Purchase Defense System
+      </div>
+      
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white mb-4 leading-tight">
+        What are you considering <span class="bg-gradient-to-r from-rose-400 to-amber-300 bg-clip-text text-transparent underline decoration-rose-500/40 decoration-wavy">buying</span>?
+      </h1>
+      
+      <p class="text-slate-400 text-base sm:text-lg mb-8 max-w-lg">
+        Paste a product link or name. Gemini will assemble a bulletproof, logical presentation designed to save you from buyer’s remorse.
+      </p>
+
+      <!-- Main Input Card -->
+      <form id="dissuadeForm" class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-2xl shadow-rose-950/20 backdrop-blur text-left">
+        
+        <!-- URL / Product Field -->
+        <div class="mb-4">
+          <label for="productUrl" class="block text-xs font-mono font-medium text-slate-300 mb-2 flex items-center justify-between">
+            <span>PRODUCT URL OR ITEM NAME <span class="text-rose-400">*</span></span>
+            <span class="text-[10px] text-slate-500">e.g. Amazon, BestBuy, or item name</span>
+          </label>
+          <div class="relative flex items-center">
+            <i data-lucide="link" class="w-5 h-5 absolute left-3.5 text-slate-500 pointer-events-none"></i>
+            <input 
+              type="text" 
+              id="productUrl" 
+              name="productUrl"
+              required
+              placeholder="https://www.amazon.com/dp/... or 'Sony WH-1000XM5 headphones'"
+              class="w-full bg-slate-950/80 border border-slate-700/80 rounded-xl pl-11 pr-4 py-3.5 text-sm sm:text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition shadow-inner font-mono"
+            >
+          </div>
+        </div>
+
+        <!-- Optional Accordion for extra context (Price & Reason) -->
+        <div class="mb-5">
+          <button 
+            type="button" 
+            id="toggleExtraFields" 
+            class="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1.5 focus:outline-none transition mb-2"
+          >
+            <i data-lucide="chevron-right" id="extraFieldsChevron" class="w-3.5 h-3.5 transition-transform duration-200"></i>
+            <span>Add price &amp; your temptation (helps Gemini roast harder)</span>
+          </button>
+          
+          <div id="extraFieldsContainer" class="hidden space-y-3 pt-2 pl-2 border-l-2 border-slate-800">
+            <div>
+              <label for="priceInput" class="block text-xs font-mono text-slate-400 mb-1">PRICE (APPROXIMATE)</label>
+              <input 
+                type="text" 
+                id="priceInput" 
+                placeholder="$499 or £350" 
+                class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:ring-1 focus:ring-rose-500 focus:outline-none"
+              >
+            </div>
+            <div>
+              <label for="rationaleInput" class="block text-xs font-mono text-slate-400 mb-1">WHY DO YOU THINK YOU NEED IT?</label>
+              <input 
+                type="text" 
+                id="rationaleInput" 
+                placeholder="e.g. 'It will make me work out every day' or 'It's 20% off today!'" 
+                class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 placeholder-slate-600 focus:ring-1 focus:ring-rose-500 focus:outline-none"
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          id="submitBtn"
+          class="w-full bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-rose-900/30 transition transform active:scale-[0.99] cursor-pointer"
+        >
+          <i data-lucide="flame" class="w-5 h-5"></i>
+          <span>Talk Me Out Of It</span>
+          <i data-lucide="arrow-right" class="w-5 h-5 ml-1"></i>
+        </button>
+
+        <!-- Quick Sample Items -->
+        <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-wrap items-center gap-2 text-xs">
+          <span class="text-slate-500 font-mono text-[11px]">Quick presets:</span>
+          <button type="button" class="preset-btn px-2.5 py-1 rounded bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white transition" data-item="Apple Vision Pro" data-price="$3,499" data-why="I want to work in spatial computing and watch movies on a giant virtual screen.">
+            Apple Vision Pro ($3,499)
+          </button>
+          <button type="button" class="preset-btn px-2.5 py-1 rounded bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white transition" data-item="Commercial Espresso Machine" data-price="$1,800" data-why="I'll save money by making my own specialty lattes at home!">
+            Espresso Machine ($1,800)
+          </button>
+          <button type="button" class="preset-btn px-2.5 py-1 rounded bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white transition" data-item="High-End Smart Treadmill" data-price="$2,200" data-why="I will definitely run 5 miles every single day before breakfast.">
+            Smart Treadmill ($2,200)
+          </button>
+        </div>
+
+      </form>
+
+      <!-- Trust & Privacy Note -->
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500">
+        <span class="flex items-center gap-1">
+          <i data-lucide="lock" class="w-3.5 h-3.5 text-slate-400"></i> API key stored locally in browser
+        </span>
+        <span class="flex items-center gap-1">
+          <i data-lucide="globe" class="w-3.5 h-3.5 text-slate-400"></i> Runs 100% on GitHub Pages
+        </span>
+        <span class="flex items-center gap-1">
+          <i data-lucide="brain-circuit" class="w-3.5 h-3.5 text-slate-400"></i> Pure logical dissuasion
+        </span>
+      </div>
+
+    </section>
+
+    <!-- VIEW 2: Loading State -->
+    <section id="loadingSection" class="hidden w-full max-w-xl mx-auto flex flex-col items-center justify-center text-center py-16 animate-slide-in">
+      <div class="relative mb-6">
+        <div class="w-20 h-20 rounded-full border-4 border-rose-500/20 border-t-rose-500 animate-spin"></div>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="text-2xl animate-pulse">🧠</span>
+        </div>
+      </div>
+      <h2 id="loadingHeading" class="text-2xl font-bold text-white mb-2">Analyzing your impulse purchase...</h2>
+      <p id="loadingSubtext" class="text-slate-400 text-sm max-w-md animate-pulse-subtle font-mono">
+        Scanning retail marketing tricks, calculating compound opportunity costs, and compiling the dissuasion deck...
+      </p>
+      
+      <!-- Progress indicator step pills -->
+      <div class="mt-8 flex flex-col gap-2 w-full max-w-sm text-left text-xs font-mono">
+        <div class="loading-step flex items-center gap-2 text-slate-400" id="step1">
+          <i data-lucide="check-circle" class="w-4 h-4 text-rose-500"></i>
+          <span>Auditing product claims &amp; markup</span>
+        </div>
+        <div class="loading-step flex items-center gap-2 text-slate-400" id="step2">
+          <i data-lucide="circle-dot" class="w-4 h-4 text-amber-500 animate-spin"></i>
+          <span>Uncovering hidden maintenance &amp; recurring fees</span>
+        </div>
+        <div class="loading-step flex items-center gap-2 text-slate-500" id="step3">
+          <i data-lucide="circle" class="w-4 h-4"></i>
+          <span>Formulating 6-slide logical presentation</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: Presentation View -->
+    <section id="presentationSection" class="hidden w-full flex flex-col flex-grow">
+      
+      <!-- Top Presentation Toolbar -->
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-4 pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <button id="backBtn" class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white px-2.5 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-900 transition">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <span>New Item</span>
+          </button>
+          <div>
+            <h2 id="presentationItemTitle" class="text-sm sm:text-base font-bold text-white truncate max-w-xs sm:max-w-md">
+              Product Title
+            </h2>
+            <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
+              <span id="presentationItemPrice" class="text-rose-400 font-semibold">$0.00</span>
+              <span>•</span>
+              <span id="presentationVerdictBadge" class="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-sans text-[10px] uppercase font-bold tracking-wider">
+                High Regret Risk
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls: View Toggle, Fullscreen, Copy, Print -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <button id="toggleViewModeBtn" class="flex items-center gap-1 text-xs text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-900 transition" title="Toggle Grid / Slide Mode">
+            <i data-lucide="grid" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline" id="viewModeLabel">Grid View</span>
+          </button>
+          <button id="fullscreenBtn" class="p-1.5 text-slate-400 hover:text-white rounded-lg border border-slate-800 bg-slate-900 transition" title="Fullscreen Presentation">
+            <i data-lucide="maximize-2" class="w-4 h-4"></i>
+          </button>
+          <button id="shareBtn" class="flex items-center gap-1 text-xs text-slate-300 hover:text-white px-2.5 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-900 transition" title="Copy presentation summary">
+            <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Share</span>
+          </button>
+          <button id="printBtn" class="p-1.5 text-slate-400 hover:text-white rounded-lg border border-slate-800 bg-slate-900 transition" title="Print / Save PDF">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- SLIDE DECK DISPLAY CONTAINER -->
+      <div id="deckContainer" class="flex-grow flex flex-col justify-center relative min-h-[460px] sm:min-h-[520px]">
+        
+        <!-- Individual Slide Card (dynamic injected) -->
+        <div id="activeSlideCard" class="w-full max-w-4xl mx-auto bg-slate-900/95 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl relative flex flex-col justify-between min-h-[440px] sm:min-h-[500px] transition-all duration-300">
+          <!-- Slide Content will be populated by JS -->
+        </div>
+
+        <!-- Left/Right Floating Navigation Arrows -->
+        <button id="prevSlideBtn" class="absolute left-0 sm:-left-5 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-900/90 border border-slate-700 text-slate-300 hover:text-white hover:border-rose-500/50 flex items-center justify-center shadow-xl backdrop-blur transition transform active:scale-95 disabled:opacity-20 disabled:pointer-events-none z-10" aria-label="Previous Slide">
+          <i data-lucide="chevron-left" class="w-6 h-6"></i>
+        </button>
+
+        <button id="nextSlideBtn" class="absolute right-0 sm:-right-5 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-slate-900/90 border border-slate-700 text-slate-300 hover:text-white hover:border-rose-500/50 flex items-center justify-center shadow-xl backdrop-blur transition transform active:scale-95 disabled:opacity-20 disabled:pointer-events-none z-10" aria-label="Next Slide">
+          <i data-lucide="chevron-right" class="w-6 h-6"></i>
+        </button>
+
+      </div>
+
+      <!-- Slide Deck Footer Bar: Dots & Keyboard hints -->
+      <div id="deckFooter" class="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <!-- Progress Dots -->
+        <div id="slideDots" class="flex items-center gap-2">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Slide Counter & Hotkey hint -->
+        <div class="flex items-center gap-3 text-xs text-slate-400 font-mono">
+          <span id="slideCounter">Slide 1 of 6</span>
+          <span class="hidden md:inline-block text-slate-600">|</span>
+          <span class="hidden md:flex items-center gap-1 text-[11px] text-slate-500">
+            Use <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">←</kbd> <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">→</kbd> or <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">Space</kbd>
+          </span>
+        </div>
+      </div>
+
+      <!-- GRID VIEW (Alternate view to see all slides at once) -->
+      <div id="gridViewContainer" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 my-4">
+        <!-- Injected by JS -->
+      </div>
+
+      <!-- Bottom Executive Summary & Verdict Banner -->
+      <div id="executiveVerdictBanner" class="mt-8 p-6 rounded-2xl bg-gradient-to-r from-rose-950/40 via-slate-900 to-slate-900 border border-rose-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-start gap-4">
+          <div class="p-3 bg-rose-500/20 border border-rose-500/40 rounded-xl text-rose-400">
+            <i data-lucide="gavel" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white mb-1">Bottom Line Verdict</h3>
+            <p id="bottomLineText" class="text-sm text-slate-300 leading-relaxed">
+              Step away from the checkout button. Put the money into an index fund or wait 72 hours.
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+          <button id="saveMoneyBtn" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-950/50">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            <span>I Won't Buy It! 🎉</span>
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-900 bg-slate-950 py-6 mt-auto text-center text-xs text-slate-500">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p>
+        <strong class="text-slate-400">Talk Me Out Of It</strong> — An anti-consumerism, financial mindfulness project.
+      </p>
+      <p class="font-mono text-[11px] text-slate-600">
+        Hosted with GitHub Pages • Bring Your Own Gemini Key
+      </p>
+    </div>
+  </footer>
+
+  <!-- MODAL 1: API Key Setup Modal -->
+  <div id="apiKeyModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl relative">
+      <button id="closeApiKeyModal" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center gap-3 mb-4">
+        <div class="p-2.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400">
+          <i data-lucide="key" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white">Google Gemini API Key</h3>
+          <p class="text-xs text-slate-400">Stored only in your browser's localStorage</p>
+        </div>
+      </div>
+
+      <p class="text-xs text-slate-300 leading-relaxed mb-4">
+        To generate custom dissuasion presentations directly from your browser, get a free API key from Google AI Studio. It takes 30 seconds and is free of charge.
+      </p>
+
+      <div class="mb-4">
+        <label for="apiKeyInput" class="block text-xs font-mono text-slate-300 mb-1.5">ENTER GEMINI API KEY</label>
+        <div class="relative">
+          <input 
+            type="password" 
+            id="apiKeyInput" 
+            placeholder="AIzaSy..." 
+            class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono"
+          >
+          <button type="button" id="toggleKeyVisibility" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+            <i data-lucide="eye" class="w-4 h-4" id="eyeIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-5 flex items-center justify-between text-xs">
+        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-rose-400 hover:underline flex items-center gap-1 font-medium">
+          <span>Get a free key at Google AI Studio</span>
+          <i data-lucide="external-link" class="w-3 h-3"></i>
+        </a>
+      </div>
+
+      <div class="flex gap-2">
+        <button id="saveApiKeyBtn" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition">
+          Save Key
+        </button>
+        <button id="clearApiKeyBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium py-2.5 px-4 rounded-xl text-xs transition">
+          Clear
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Celebration / Money Saved Modal -->
+  <div id="savedModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+    <div class="w-full max-w-sm bg-slate-900 border border-emerald-500/40 rounded-2xl p-6 text-center shadow-2xl relative">
+      <div class="text-5xl mb-3">🎉 💰</div>
+      <h3 class="text-xl font-black text-white mb-1">Crisis Averted!</h3>
+      <p class="text-sm text-slate-300 mb-4" id="savedModalMessage">
+        You just saved money and spared yourself the inevitable buyer's remorse.
+      </p>
+      <div class="p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl mb-5 text-emerald-300 font-mono text-xs">
+        Your future self thanks you.
+      </div>
+      <button id="closeSavedModalBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl text-xs transition">
+        Back to Sanity
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-16 opacity-0 transition-all duration-300 bg-slate-900 border border-slate-700 text-white text-xs px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2">
+    <i data-lucide="info" class="w-4 h-4 text-rose-400" id="toastIcon"></i>
+    <span id="toastMsg">Notification message</span>
+  </div>
+
+  <!-- Load Sample Data & App Scripts -->
+  <script src="sample-data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+/* =========================================================================
+   Talk Me Out Of It — Custom Styles & Presentation Animations
+   ========================================================================= */
+
+/* Smooth scroll & typography polish */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Slide Transition Animations */
+.slide-enter-active {
+  animation: slideInFromRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.slide-enter-prev-active {
+  animation: slideInFromLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(30px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090d16;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Slide Card Aesthetic */
+.slide-accent-border {
+  position: relative;
+}
+.slide-accent-border::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #f43f5e, #f59e0b, #ec4899);
+  border-top-left-radius: 1.5rem;
+  border-top-right-radius: 1.5rem;
+}
+
+/* Dot Navigation indicators */
+.slide-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background-color: #334155;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.slide-dot:hover {
+  background-color: #64748b;
+  transform: scale(1.2);
+}
+.slide-dot.active {
+  width: 28px;
+  background: linear-gradient(90deg, #f43f5e, #fb7185);
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.5);
+}
+
+/* Fullscreen Presentation Mode adjustments */
+:fullscreen #presentationSection {
+  padding: 2rem 4rem;
+  background: #020617;
+  height: 100vh;
+  justify-content: center;
+}
+
+:fullscreen #activeSlideCard {
+  max-width: 1100px;
+  min-height: 600px;
+}
+
+/* Print / PDF Styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  header, footer, #inputSection, #loadingSection, #deckFooter, #prevSlideBtn, #nextSlideBtn, #toggleViewModeBtn, #fullscreenBtn, #shareBtn, #backBtn {
+    display: none !important;
+  }
+
+  #presentationSection {
+    display: block !important;
+  }
+
+  #deckContainer {
+    display: none !important;
+  }
+
+  #gridViewContainer {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 1.5rem !important;
+  }
+
+  .grid-slide-card {
+    border: 1px solid #ccc !important;
+    background: #fdfdfd !important;
+    color: #111 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+
+  .text-white {
+    color: #000 !important;
+  }
+
+  .text-slate-400, .text-slate-300 {
+    color: #444 !important;
+  }
+}
