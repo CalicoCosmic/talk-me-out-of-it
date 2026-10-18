@@ -1,11 +1,15 @@
-/**
- * Talk Me Out Of It — Application Core
- * Connects to Google Gemini API to formulate logical dissuasion presentations
- */
+// =========================================================================
+// Configuration
+// =========================================================================
+// If you deploy the Cloudflare Worker (see worker/README.md), paste its URL here
+// (e.g. 'https://talk-me-out-of-it-proxy.calicocosmic.workers.dev')
+// When set, visitors do NOT need to enter an API key!
+const PROXY_API_URL = '';
 
 const app = {
   // State
   apiKey: localStorage.getItem('gemini_api_key') || '',
+  proxyUrl: PROXY_API_URL,
   currentPresentation: null,
   currentSlideIndex: 0,
   isGridView: false,
@@ -275,10 +279,13 @@ const app = {
   updateApiKeyUI() {
     const label = document.getElementById('apiKeyBtnLabel');
     if (this.apiKey) {
-      label.textContent = 'API Key ✓';
+      label.textContent = 'Custom Key ✓';
+      label.classList.add('text-emerald-400');
+    } else if (this.proxyUrl) {
+      label.textContent = 'Shared Key ✓';
       label.classList.add('text-emerald-400');
     } else {
-      label.textContent = 'Set API Key';
+      label.textContent = 'API Key';
       label.classList.remove('text-emerald-400');
     }
   },
@@ -354,8 +361,8 @@ const app = {
       return;
     }
 
-    if (!this.apiKey) {
-      // If no API key, prompt user or use demo
+    if (!this.apiKey && !this.proxyUrl) {
+      // If no API key and no proxy configured, prompt user or use demo
       document.getElementById('apiKeyModal').classList.remove('hidden');
       this.showToast('Please provide a Google Gemini API Key first (or click Try Demo)', 'alert');
       return;
@@ -496,6 +503,29 @@ Make the points specific, sharp, logical, grounded, and deeply persuasive.
 Do NOT include any introduction, conversational filler, or markdown wrappers. Output only the pure JSON.
 `;
 
+    // 1. If PROXY_API_URL is configured and user hasn't provided a custom key, use the proxy
+    if (this.proxyUrl && !this.apiKey) {
+      const response = await fetch(this.proxyUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ prompt: promptText })
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.error || `Proxy returned HTTP ${response.status}`);
+      }
+
+      const parsed = await response.json();
+      if (!parsed.slides || !Array.isArray(parsed.slides)) {
+        throw new Error('Invalid presentation structure returned from proxy.');
+      }
+      return parsed;
+    }
+
+    // 2. Otherwise, use user's personal key directly via Google Generative Language API
     const modelsToTry = ['gemini-2.5-flash', 'gemini-1.5-flash'];
     let lastError = null;
 
