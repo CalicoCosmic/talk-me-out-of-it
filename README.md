@@ -38,26 +38,21 @@ Built specifically to run **100% serverless from a GitHub Pages site**.
 Because this project is built with vanilla HTML, modern CSS, and JavaScript, **there are no build steps or Node.js dependencies required**.
 
 ### Step 1: Create a GitHub Repository
-1. Go to [github.com/new](https://github.com/new) and create a repository (e.g. `talk-me-out-of-it`).
-2. Clone or push this project folder to your repository:
+1. Go to [github.com/new](https://github.com/new) and create a public repository named `talk-me-out-of-it`.
+2. Push this project folder to your repository:
    ```bash
-   git init
-   git add .
-   git commit -m "Initial commit of Talk Me Out Of It"
-   git branch -M main
-   git remote add origin https://github.com/<YOUR-USERNAME>/talk-me-out-of-it.git
    git push -u origin main
    ```
 
 ### Step 2: Enable GitHub Pages
-1. Go to your repository on GitHub.
+1. Go to your repository on GitHub: `https://github.com/CalicoCosmic/talk-me-out-of-it`
 2. Click on **Settings** > **Pages** (in the left sidebar).
 3. Under **Build and deployment**:
    - **Source**: Select `Deploy from a branch`.
    - **Branch**: Select `main` and folder `/ (root)`.
    - Click **Save**.
 4. In about 30 seconds, your site will be live at:
-   `https://<YOUR-USERNAME>.github.io/talk-me-out-of-it/`
+   👉 **`https://calicocosmic.github.io/talk-me-out-of-it/`**
 
 ---
 
